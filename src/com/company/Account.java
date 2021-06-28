@@ -12,9 +12,14 @@ import org.json.simple.parser.ParseException;
 public class Account {
     String username;
     String password;
-    String name;
     boolean isTeller;
-    int SSN = 433222100; // Just a placeholder
+    // Bank information below
+    String SSN = "666-420-6969"; // Just a placeholder
+    double income = 1337.00;
+    String phoneNum = "760-706-7424";
+    String email = "JohnDoe@Gmail.com";
+    String name;
+
 
     double balance = 1337.00;
 
@@ -39,18 +44,14 @@ public class Account {
         // The global account list
         JSONArray accountList = new JSONArray();
 
+        accountDetails.put("username", acct.username);
         accountDetails.put("password", acct.password);
-        accountDetails.put("name", acct.name);
         accountDetails.put("isTeller", acct.isTeller);
         // This account
-        JSONObject account = new JSONObject();
-        account.put(acct.username, accountDetails);
-
-        accountList.add(account);
 
         try (FileWriter file = new FileWriter("accounts.json")) {
             // Write the json information to the file.
-            file.write(accountList.toJSONString());
+            file.write(accountDetails.toJSONString());
             file.flush();
         } catch (IOException e) {
             e.printStackTrace();
