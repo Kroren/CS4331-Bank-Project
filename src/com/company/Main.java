@@ -19,27 +19,30 @@ public class Main {
     public static void menu() throws FileNotFoundException {
         Scanner sc = new Scanner(System.in);
 
-        System.out.println("Welcome to bank of Uganda");
+        System.out.println("Welcome to Secure Bank of Uganda");
         System.out.println("+------------------------+");
-        System.out.println("[1] Customer\n[1] Bank Teller");
+        System.out.println("[1] Customer");
+        System.out.println("[2] Bank Teller");
 
+        System.out.println("Please Enter Selection: ");
         int user = sc.nextInt();
 
-        customerLogin(sc);
-
-        /*switch (user) {
+        switch (user)
+        {
             case 1:
                 customerLogin(sc);
+                break;
             case 2:
-                tellerLogin(sc);
-            default:
-                break;*/
+                System.out.println("teller Login comming");
+                break;
+        }
     }
 
     static void customerLogin(Scanner s) throws FileNotFoundException {
-        System.out.println("\n\n Welcome customer");
+        // Created customer class object
+        System.out.println("\n\nWelcome Customer");
         System.out.println("-----------------");
-        System.out.println("[1] Login \n [2] Register \n [3] Exit");
+        System.out.println("[1] Login \n[2] Register \n[3] Exit");
 
         int choice = s.nextInt();
 
@@ -54,8 +57,10 @@ public class Main {
                 try {
                     boolean isLoggedIn = login(username, password);
                     if (isLoggedIn) {
+                        System.out.println("logged in");
                         // Go to customer panel
                     } else {
+                        System.out.println("access Denied");
                         // Deny access
                     }
 
@@ -114,5 +119,43 @@ public class Main {
         System.out.println("[DEBUG] Found password: " + pass);
 
         return isValid;
+    }
+
+    static void tellerLogin(Scanner s) throws FileNotFoundException {
+        // Created bank teller class object
+        System.out.println("\n\nWelcome Bank Teller");
+        System.out.println("-----------------");
+        System.out.println("[1] Login \n[2] Register \n[3] Exit");
+
+        int choice = s.nextInt();
+
+        switch (choice) {
+            case 1:
+                // Login here
+                System.out.print("\nUsername: ");
+                String username = s.next();
+                System.out.print("Password: ");
+                String password = s.next();
+                // Might add password masking later.
+                try {
+                    boolean isLoggedIn = login(username, password);
+                    if (isLoggedIn) {
+                        System.out.println("logged in");
+                        // Go to bank teller panel
+                    } else {
+                        System.out.println("access Denied");
+                        // Deny access
+                    }
+
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case 2:
+                // banktller register if you want?
+                break;
+            case 3:
+                break;
+        }
     }
 }
