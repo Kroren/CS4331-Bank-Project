@@ -22,7 +22,7 @@ public class Main {
 
         int user = sc.nextInt();
 
-        customerLogin();
+        customerLogin(sc);
 
         /*switch (user) {
             case 1:
@@ -33,28 +33,38 @@ public class Main {
                 break;*/
     }
 
-    static void customerLogin() throws FileNotFoundException {
+    static void customerLogin(Scanner s) throws FileNotFoundException {
         System.out.println("\n\n Welcome customer");
         System.out.println("-----------------");
         System.out.println("[1] Login \n [2] Register \n [3] Exit");
 
-        //int choice = s.nextInt();
+        int choice = s.nextInt();
 
-        // Test account case:
-        String testUsername = "poggers";
-        String testPass = "supergam,er";
-        String name = "John Fortnite";
-
-        try {
-            Account testAcct = new Account(testUsername, testPass, name, false);
-            testAcct.accountWrite(testAcct);
-
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
+        switch (choice) {
+            case 1:
+                // Login here
+            case 2:
+                customerRegister(s);
+                break;
+            case 3:
+                break;
         }
     }
 
-    static void tellerLogin(Scanner s) {
-        // If the user logs in as a bank teller
+    static void customerRegister(Scanner s) {
+        System.out.println("Username: ");
+        String username = s.next();
+        System.out.println("Password: ");
+        String password = s.next();
+        System.out.println("What is your full name?");
+        String fullName = s.next();
+        try {
+            Account newAccount = new Account(username, password, fullName, false);
+            newAccount.accountWrite(newAccount);
+            System.out.println("Account creation successful, Returning to Login");
+            return;
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -21,7 +21,6 @@ public class Account {
     Account(String username, String password, String name, boolean isTeller) throws IOException, ParseException {
         JSONParser jsonParser = new JSONParser();
         Object obj = jsonParser.parse(new FileReader("Accounts.json"));
-        JSONArray infoArray = (JSONArray)obj;
 
         this.username = username;
         this.password = password;
@@ -33,35 +32,27 @@ public class Account {
         // encrypt and secure
         // Write
     }
-
+    @SuppressWarnings("unchecked")
     public void accountWrite(Account acct) throws FileNotFoundException {
         // Json writer isn't working entirely correctly.
-        JSONParser jsonParser = new JSONParser();
-        try {
-            Object obj = jsonParser.parse(new FileReader("accounts.json"));
-            JSONArray infoArray = (JSONArray)obj;
-            JSONArray parentArray = (JSONArray)obj;
-            JSONObject user = new JSONObject();
+        JSONObject accountDetails = new JSONObject();
+        // The global account list
+        JSONArray accountList = new JSONArray();
 
-            System.out.println(infoArray);
+        accountDetails.put("password", acct.password);
+        accountDetails.put("name", acct.name);
+        accountDetails.put("isTeller", acct.isTeller);
+        // This account
+        JSONObject account = new JSONObject();
+        account.put(acct.username, accountDetails);
 
-            JSONObject accountInfo = new JSONObject();
-            accountInfo.put("username", acct.username);
-            accountInfo.put("password", acct.password);
+        accountList.add(account);
 
-
-            infoArray.add(accountInfo);
-
-            user.put(acct.username, infoArray);
-
-            System.out.println(infoArray);
-
-            FileWriter file = new FileWriter("accounts.json");
-            file.write(infoArray.toJSONString());
+        try (FileWriter file = new FileWriter("accounts.json")) {
+            // Write the json information to the file.
+            file.write(accountList.toJSONString());
             file.flush();
-            file.close();
-
-        } catch (ParseException | IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
