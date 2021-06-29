@@ -3,13 +3,27 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.Arrays;
 import java.util.Scanner;
 
+
 public class Main {
+    ObjectInputStream inputStream = null;
     public static void main(String[] args) throws FileNotFoundException {
+
+        if(!Encryption.keysPresent()) {
+            // Check and make sure if a public key and private key already exist
+            // Generate one otherwise.
+            Encryption.generateKey();
+            System.out.println("[DEBUG] No keys found, generated some!");
+        }
+
+
+
+
         boolean exit = false;
         while (!exit) {
             menu();
@@ -26,7 +40,7 @@ public class Main {
 
         System.out.println("Please Enter Selection: ");
         int user = sc.nextInt();
-
+        // Create security object
         switch (user)
         {
             case 1:
@@ -77,6 +91,7 @@ public class Main {
     }
 
     static void customerRegister(Scanner s) {
+        // Register a new account.
         System.out.println("Welcome!  Please fill out a short questionaire in order fill out your bank account details with us.\n");
 
         System.out.print("Username: ");
@@ -91,7 +106,11 @@ public class Main {
         System.out.println("I'm too lazy to actually fill out the rest of the prompt, so using all the filler info.");
         try {
             Account newAccount = new Account(username, password, fullName, false);
+
+
+
             newAccount.accountWrite(newAccount);
+            newAccount.bankWrite(newAccount);
             System.out.println("Account creation successful, Returning to Login");
             return;
 
@@ -103,20 +122,39 @@ public class Main {
     static boolean login(String username, String password) throws FileNotFoundException {
         boolean isValid = true;
         // Parsing accounts. json file
-        Object obj = null;
         try {
-            obj = new JSONParser().parse(new FileReader("Accounts.json"));
-        } catch (IOException | ParseException e) {
+            Object obj = new JSONParser().parse(new FileReader("Accounts.json"));
+
+            // Typecasting to JSONObject
+            JSONObject jo = (JSONObject) obj;
+
+            String user = (String) jo.get("username");
+            byte[] pass = (byte[]) jo.get("password");
+            System.out.println(Arrays.toString(pass));
+
+            ObjectInputStream inputStream = null;
+            inputStream = new ObjectInputStream(new FileInputStream(Encryption.PRIVATE_KEY_FILE));
+            final PrivateKey privateKey = (PrivateKey) inputStream.readObject();
+            final String plainText = Encryption.decrypt(pass, privateKey);
+
+            System.out.println("[DEBUG] Decrypted pass reads: " + plainText);
+
+
+            System.out.println("[DEBUG] Found username: " + user);
+            System.out.println("[DEBUG] Found password: " + pass);
+
+            // If the login is valid
+            if (username.equals(user) & password.equals(pass)) {
+                Customer customer = new Customer();
+                // Login approved
+                isValid = true;
+            } else {
+                System.out.println("Access denied");
+                isValid = false;
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        // Typecasting to JSONObject
-        JSONObject jo = (JSONObject) obj;
-
-        String user = (String) jo.get("username");
-        String pass = (String) jo.get("password");
-
-        System.out.println("[DEBUG] Found username: " + user);
-        System.out.println("[DEBUG] Found password: " + pass);
 
         return isValid;
     }

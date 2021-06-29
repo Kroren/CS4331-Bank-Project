@@ -11,6 +11,7 @@ public class Customer {
 
         System.out.println("**************************");
         System.out.println("Customer Menu");
+        System.out.println("**************************");
         System.out.println("[1] View Profile");
         System.out.println("[2] Query Account");
         System.out.println("[3] Transfer Funds");
