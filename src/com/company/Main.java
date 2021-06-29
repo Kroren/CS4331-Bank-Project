@@ -6,6 +6,7 @@ import org.json.simple.parser.ParseException;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
+import java.util.Base64;
 import java.util.Scanner;
 
 
@@ -19,6 +20,9 @@ public class Main {
             Encryption.generateKey();
             System.out.println("[DEBUG] No keys found, generated some!");
         }
+        // Generate stocks
+        Stocks.populateStocks();
+
         boolean exit = false;
         while (!exit) {
             menu();
@@ -28,7 +32,7 @@ public class Main {
     public static void menu() throws FileNotFoundException {
         Scanner sc = new Scanner(System.in);
 
-        System.out.println("Welcome to Secure Bank of Uganda");
+        System.out.println("Welcome to Secure Bank of Springfield");
         System.out.println("+------------------------+");
         System.out.println("[1] Customer");
         System.out.println("[2] Bank Teller");
@@ -46,6 +50,8 @@ public class Main {
                 break;
         }
     }
+
+    //static void generateStocks() { }
 
     static void customerLogin(Scanner s) throws FileNotFoundException {
 
@@ -128,13 +134,14 @@ public class Main {
             String pass = (String) jo.get("password");
 
             // convert back to a byte array
-            byte[] encodedPass = pass.getBytes(StandardCharsets.ISO_8859_1);
-            System.out.println("[DEBUG] encoded pass = " + encodedPass);
+            //byte[] encodedPass = pass.getBytes(StandardCharsets.ISO_8859_1);
+            byte[] decodedPass = Base64.getDecoder().decode(pass);
+            System.out.println("[DEBUG] encoded pass = " + decodedPass);
 
             ObjectInputStream inputStream = null;
             inputStream = new ObjectInputStream(new FileInputStream(Encryption.PRIVATE_KEY_FILE));
             final PrivateKey privateKey = (PrivateKey) inputStream.readObject();
-            final String plainText = Encryption.decrypt(encodedPass, privateKey);
+            final String plainText = Encryption.decrypt(decodedPass, privateKey);
 
             System.out.println("[DEBUG] Decrypted pass reads: " + plainText);
 

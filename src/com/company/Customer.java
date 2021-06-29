@@ -1,6 +1,11 @@
 package com.company;
 
+import java.text.DecimalFormat;
+import java.util.Iterator;
+import java.util.Random;
 import java.util.Scanner;
+
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -39,22 +44,23 @@ public class Customer {
                     viewProfile();
                 case 2:
                     //queryAccount();
+                    queryAccount();
                 case 3:
                     //transfer funds
                 case 4:
-                    //query stock
+                    queryStocks();
                 case 5:
                     //buy stock
                 case 6:
                     //sell stock
                 case 7:
                     logOut();
+                default:
+                    displayMenu();
             }
         }
         while(true);
     }
-
-
 
      public void viewProfile() throws FileNotFoundException {
 
@@ -111,9 +117,9 @@ public class Customer {
              e.printStackTrace();
          }
          JSONObject jo = (JSONObject) obj;
-         int accountNumber = (int) jo.get("account number");
-         int checking = (int) jo.get("checking");
-         int savings = (int) jo.get("savings");
+         long accountNumber = (long) jo.get("account number");
+         long checking = (long) jo.get("checking");
+         long savings = (long) jo.get("savings");
 
          Scanner s = new Scanner(System.in);
          System.out.println("Please Enter Account Number: ");
@@ -129,7 +135,6 @@ public class Customer {
 
 
      }
-
 
     public void transferFunds() {
 
@@ -168,7 +173,42 @@ public class Customer {
 //    }
     }
 
-    //public void queryStocks(String customerName) {}
+    public void queryStocks() {
+        DecimalFormat formatter = new DecimalFormat("#0.00");
+        JSONParser parser = new JSONParser();
+
+
+        System.out.println("+------ Stock Exchange ------+");
+        try {
+            FileReader reader = new FileReader("Stocks.json");
+            Object obj = parser.parse(reader);
+            JSONArray stockArray = (JSONArray) obj;
+            Random r = new Random();
+
+            for (int i = 0; i < stockArray.size(); i++) {
+                JSONObject stockList = (JSONObject) stockArray.get(i);
+                String currentStock = Stocks.names[i];
+                JSONObject stock = (JSONObject) stockList.get(currentStock);
+
+                int coinFlip = r.nextInt(2);
+                String flip;
+
+                if (coinFlip == 1) {
+                    flip = "+";
+                } else {
+                    flip = "-";
+                }
+
+                System.out.print(currentStock);
+                System.out.print(" | PRICE " + formatter.format(stock.get("unitPrice")));
+                System.out.print(" | QUANTITY " + stock.get("quantity"));
+                System.out.print(" | %CHANGE " + flip + stock.get("change") + "%" + "\n");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     //public void buyStock(String stockName, int quantity, double price, int accountNumber) {}
 
@@ -181,7 +221,7 @@ public class Customer {
         int choice = s.nextInt();
 
         if (choice == 1 ) {
-            System.out.println("Thank You For Choosing the Secure Bank of Uganda Goodbye");
+            System.out.println("Thank You For Choosing the Secure Bank of Springfield Goodbye");
             System.exit(0);
         }
         else if (choice ==  2) {

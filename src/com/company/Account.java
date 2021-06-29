@@ -53,10 +53,11 @@ public class Account {
             final byte[] encryptedPassword = Encryption.encrypt(acct.password, publicKey);
 
             // Trying to make a format that works for json
-            String decodedPass = new String(encryptedPassword, StandardCharsets.ISO_8859_1);
+            //String decodedPass = new String(encryptedPassword, StandardCharsets.ISO_8859_1);
+            String encodedPass = Base64.getEncoder().encodeToString(encryptedPassword);
 
             accountDetails.put("username", acct.username);
-            accountDetails.put("password", decodedPass);
+            accountDetails.put("password", encodedPass);
             accountDetails.put("isTeller", acct.isTeller);
             // This account
 
@@ -74,6 +75,8 @@ public class Account {
         JSONObject profileDetails = new JSONObject();
         // The global account list
         // JSONArray accountList = new JSONArray();
+
+
 
         profileDetails.put("name", acct.name);
         profileDetails.put("ssn", acct.ssn);
