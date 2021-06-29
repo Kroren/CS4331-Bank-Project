@@ -6,8 +6,6 @@ import org.json.simple.parser.ParseException;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.Arrays;
 import java.util.Scanner;
 
 
@@ -21,10 +19,6 @@ public class Main {
             Encryption.generateKey();
             System.out.println("[DEBUG] No keys found, generated some!");
         }
-
-
-
-
         boolean exit = false;
         while (!exit) {
             menu();
@@ -54,13 +48,14 @@ public class Main {
     }
 
     static void customerLogin(Scanner s) throws FileNotFoundException {
-        // Created customer class object
+
+        Customer customer = new Customer();
+
         System.out.println("\n\nWelcome Customer");
         System.out.println("-----------------");
         System.out.println("[1] Login \n[2] Register \n[3] Exit");
 
         int choice = s.nextInt();
-
         switch (choice) {
             case 1:
                 // Login here
@@ -74,8 +69,9 @@ public class Main {
                     if (isLoggedIn) {
                         System.out.println("logged in");
                         // Go to customer panel
+                        customer.displayMenu();
                     } else {
-                        System.out.println("access Denied");
+                        System.out.println("Incorrect Username or Password");
                         // Deny access
                     }
 
@@ -108,9 +104,8 @@ public class Main {
         try {
             Account newAccount = new Account(username, password, fullName, false);
 
-
-
             newAccount.accountWrite(newAccount);
+            newAccount.profileWrite(newAccount);
             newAccount.bankWrite(newAccount);
             System.out.println("Account creation successful, Returning to Login");
             return;
@@ -141,16 +136,16 @@ public class Main {
             final PrivateKey privateKey = (PrivateKey) inputStream.readObject();
             final String plainText = Encryption.decrypt(encodedPass, privateKey);
 
-            // System.out.println("[DEBUG] Decrypted pass reads: " + plainText);
+            System.out.println("[DEBUG] Decrypted pass reads: " + plainText);
 
 
             // If the login is valid
-            if (username.equals(user) & password.equals(pass)) {
-                Customer customer = new Customer();
+            if (username.equals(user) & plainText.equals(password)) {
+
                 // Login approved
                 isValid = true;
             } else {
-                System.out.println("Access denied");
+                System.out.println("Incorrect Username or Password");
                 isValid = false;
             }
         } catch (Exception e) {
