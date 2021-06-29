@@ -4,6 +4,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Arrays;
@@ -129,19 +130,19 @@ public class Main {
             JSONObject jo = (JSONObject) obj;
 
             String user = (String) jo.get("username");
-            byte[] pass = (byte[]) jo.get("password");
-            System.out.println(Arrays.toString(pass));
+            String pass = (String) jo.get("password");
+
+            // convert back to a byte array
+            byte[] encodedPass = pass.getBytes(StandardCharsets.ISO_8859_1);
+            System.out.println("[DEBUG] encoded pass = " + encodedPass);
 
             ObjectInputStream inputStream = null;
             inputStream = new ObjectInputStream(new FileInputStream(Encryption.PRIVATE_KEY_FILE));
             final PrivateKey privateKey = (PrivateKey) inputStream.readObject();
-            final String plainText = Encryption.decrypt(pass, privateKey);
+            final String plainText = Encryption.decrypt(encodedPass, privateKey);
 
-            System.out.println("[DEBUG] Decrypted pass reads: " + plainText);
+            // System.out.println("[DEBUG] Decrypted pass reads: " + plainText);
 
-
-            System.out.println("[DEBUG] Found username: " + user);
-            System.out.println("[DEBUG] Found password: " + pass);
 
             // If the login is valid
             if (username.equals(user) & password.equals(pass)) {

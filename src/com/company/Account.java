@@ -1,5 +1,6 @@
 package com.company;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.Base64;
@@ -45,8 +46,11 @@ public class Account {
             final PublicKey publicKey = (PublicKey) inputStream.readObject();
             final byte[] encryptedPassword = Encryption.encrypt(acct.password, publicKey);
 
+            // Trying to make a format that works for json
+            String decodedPass = new String(encryptedPassword, StandardCharsets.ISO_8859_1);
+
             accountDetails.put("username", acct.username);
-            accountDetails.put("password", encryptedPassword);
+            accountDetails.put("password", decodedPass);
             accountDetails.put("isTeller", acct.isTeller);
             // This account
 
