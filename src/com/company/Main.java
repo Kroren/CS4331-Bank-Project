@@ -84,6 +84,10 @@ public class Main {
 
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
                 break;
             case 2:

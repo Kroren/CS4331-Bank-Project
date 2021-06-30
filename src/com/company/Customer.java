@@ -20,7 +20,7 @@ import java.util.Arrays;
 
 public class Customer {
 
-    public void displayMenu() throws FileNotFoundException {
+    public void displayMenu() throws IOException, ParseException {
 
         Scanner in = new Scanner(System.in);
         boolean quite = false;
@@ -47,7 +47,7 @@ public class Customer {
                     queryAccount();
                     break;
                 case 3:
-                    //transferFunds();
+                    transferFunds();
                     break;
                 case 4:
                     queryStocks();
@@ -140,6 +140,7 @@ public class Customer {
 
      public void transferFunds() throws IOException, ParseException {
 
+
          JSONObject bankDetails = new JSONObject();
          //get banking information from bank.json
          Object obj = null;
@@ -151,10 +152,10 @@ public class Customer {
              e.printStackTrace();
          }
          JSONObject jo = (JSONObject) obj;
-         //long accountNumber = (long) jo.get("account number");
+         long accountNumber = (long) jo.get("account number");
          double checkingAmount = (double) jo.get("checking");
          double savingsAmount = (double) jo.get("savings");
-
+         //int accountNumber = (int) jo.get("account number");
 
         Scanner s = new Scanner(System.in);
         System.out.println("Please Enter Amount To Transfer in Exact Change: ");
@@ -167,6 +168,11 @@ public class Customer {
                 System.out.println("Transferring $"+transferAmount + " to Savings");
                 double newChecking = checkingAmount - transferAmount;
                 double newSavings = savingsAmount + transferAmount;
+
+                bankDetails.put("checking", newChecking);
+                bankDetails.put("savings", newSavings);
+                bankDetails.put("account number", accountNumber);
+
             }
             else {
                 System.out.println("Insufficient Funds");
@@ -177,6 +183,11 @@ public class Customer {
                 System.out.println("Transferring " + transferAmount + "to Checking");
                 double newSavings = savingsAmount - transferAmount;
                 double newChecking = checkingAmount + transferAmount;
+
+                bankDetails.put("checking", newChecking);
+                bankDetails.put("savings", newSavings);
+                bankDetails.put("account number", accountNumber);
+
             }
             else {
                 System.out.println("Insufficient Funds");
@@ -186,8 +197,6 @@ public class Customer {
             System.out.println("Invalid Entry Please Try Again");
         }
 
-//        bankDetails.put("checking", newChecking);
-//        bankDetails.put("savings", newSavings);
 
         try (FileWriter file = new FileWriter("bank.json")) {
             // Write the json information to the file.
