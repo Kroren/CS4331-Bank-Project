@@ -21,12 +21,12 @@ public class Account {
     String name;
     String address = "123 69th St";
 
-    int accountNumber = 696969;
+    String accountNumber = "6666942069";
     double checking = 1000.00;
     double savings = 1000.00;
 
-    int tellerId = 6969;
-    String tellerPassword = "teller";
+    String tellerId;
+    String tellerPassword;
 
 
     double balance = 1337.00;
@@ -40,10 +40,6 @@ public class Account {
         this.isTeller = isTeller;
 
     }
-
-
-
-
 
     @SuppressWarnings("unchecked")
     public void accountWrite(Account acct) throws FileNotFoundException {
@@ -80,16 +76,23 @@ public class Account {
         JSONObject profileDetails = new JSONObject();
         // The global account list
         // JSONArray accountList = new JSONArray();
+        try {
+            ObjectInputStream inputStream = null;
+            inputStream = new ObjectInputStream(new FileInputStream(Encryption.PUBLIC_KEY_FILE));
+            final PublicKey publicKey = (PublicKey) inputStream.readObject();
+            //final byte[] encryptedSocial = Encryption.encrypt(acct.ssn, publicKey);
+            //String encodedSocial = Encryption.encode(encryptedSocial);
 
 
-
-        profileDetails.put("name", acct.name);
-        profileDetails.put("ssn", acct.ssn);
-        profileDetails.put("income", acct.income);
-        profileDetails.put("phone number", acct.phoneNum);
-        profileDetails.put("email", acct.email);
-        profileDetails.put("address", acct.address);
-
+            profileDetails.put("name", acct.name);
+            profileDetails.put("ssn", acct.ssn);
+            profileDetails.put("income", acct.income);
+            profileDetails.put("phone number", acct.phoneNum);
+            profileDetails.put("email", acct.email);
+            profileDetails.put("address", acct.address);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         // This account
 
         try (FileWriter file = new FileWriter("profile.json")) {
@@ -103,11 +106,19 @@ public class Account {
 
     public void bankWrite(Account acct) throws FileNotFoundException {
         JSONObject bankDetails = new JSONObject();
+        try {
+            ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(Encryption.PUBLIC_KEY_FILE));
+            final PublicKey publicKey = (PublicKey) inputStream.readObject();
 
-        bankDetails.put("account number", acct.accountNumber);
-        bankDetails.put("checking", acct.checking);
-        bankDetails.put("savings", acct.savings);
+            final byte[] encryptedAcct = Encryption.encrypt(acct.accountNumber, publicKey);
+            String encodedAcct = Encryption.encode(encryptedAcct);
 
+            bankDetails.put("account number", encodedAcct);
+            bankDetails.put("checking", acct.checking);
+            bankDetails.put("savings", acct.savings);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         try (FileWriter file = new FileWriter("bank.json")) {
             // Write the json information to the file.
             file.write(bankDetails.toJSONString());
@@ -117,31 +128,31 @@ public class Account {
         }
     }
 
+    @SuppressWarnings("unchecked")
+     public void tellerWrite(Account acct) throws FileNotFoundException {
+         try {
+             // Save the info here
+             JSONObject accountDetails = new JSONObject();
 
-//    public void tellerWrite(?????) throws FileNotFoundException {
-//        try {
-//            // Save the info here
-//            JSONObject accountDetails = new JSONObject();
-//
-//            // Encrypt the password
-//            ObjectInputStream inputStream = null;
-//            inputStream = new ObjectInputStream(new FileInputStream(Encryption.PUBLIC_KEY_FILE));
-//            final PublicKey publicKey = (PublicKey) inputStream.readObject();
-//            final byte[] encryptedTPassword = Encryption.encrypt(acct.tellerPassword, publicKey);
-//
-//            // Trying to make a format that works for json
-//            //String decodedPass = new String(encryptedPassword, StandardCharsets.ISO_8859_1);
-//            String encodedTPass = Base64.getEncoder().encodeToString(encryptedTPassword);
-//
-//            accountDetails.put("Teller ID", acct.tellerId);
-//            accountDetails.put("password", encodedTPass);
-//
-//            FileWriter file = new FileWriter("tellerAccount.json");
-//            // Write the json information to the file.
-//            file.write(accountDetails.toJSONString());
-//            file.flush();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
+             // Encrypt the password
+             ObjectInputStream inputStream = null;
+             inputStream = new ObjectInputStream(new FileInputStream(Encryption.PUBLIC_KEY_FILE));
+             final PublicKey publicKey = (PublicKey) inputStream.readObject();
+             final byte[] encryptedTPassword = Encryption.encrypt(acct.password, publicKey);
+
+             // Trying to make a format that works for json
+             //String decodedPass = new String(encryptedPassword, StandardCharsets.ISO_8859_1);
+             String encodedTPass = Encryption.encode(encryptedTPassword);
+
+             accountDetails.put("Teller ID", acct.tellerId);
+             accountDetails.put("password", encodedTPass);
+
+             FileWriter file = new FileWriter("tellerAccount.json");
+             // Write the json information to the file.
+             file.write(accountDetails.toJSONString());
+             file.flush();
+         } catch (Exception e) {
+             e.printStackTrace();
+          }
+      }
 }

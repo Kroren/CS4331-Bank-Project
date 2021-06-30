@@ -22,6 +22,14 @@ public class Main {
         }
         // Generate stocks
         Stocks.populateStocks();
+        try {
+            Account testTeller = new Account("teller", "tellerpassword", "teller", true);
+            testTeller.tellerId = "696969";
+
+            testTeller.tellerWrite(testTeller);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         boolean exit = false;
         while (!exit) {
@@ -140,7 +148,7 @@ public class Main {
 
             // convert back to a byte array
             //byte[] encodedPass = pass.getBytes(StandardCharsets.ISO_8859_1);
-            byte[] decodedPass = Base64.getDecoder().decode(pass);
+            byte[] decodedPass = Encryption.decode(pass);
             System.out.println("[DEBUG] encoded pass = " + decodedPass);
 
             ObjectInputStream inputStream = null;

@@ -92,19 +92,29 @@ public class Customer {
          System.out.println("Please Enter Customer SSN in the Following Format ___-___-____ : ");
          String ssn = s.next();
 
-         //Name and ssn validation
-         if (name.equals(Name) && ssn.equals(SSN)) {
-             System.out.println("Name: " + Name);
-             System.out.println("SSN: " + SSN);
-             System.out.println("Address: " + Address);
-             System.out.println("Phone Number: " + Phone);
-             System.out.println("Income: $"+Income);
-             System.out.println("Email: " + Email);
-         }
-         else {
-             System.out.println("Incorrect Name or SSN");
-         }
+         try {
+             // Decrypt SSN and Address
+             ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(Encryption.PRIVATE_KEY_FILE));
+             final PrivateKey pkey = (PrivateKey) inputStream.readObject();
+             //byte[] decodedSocial = Encryption.decode(SSN);
+             //String decryptedSocial = Encryption.decrypt(decodedSocial, pkey);
 
+             //byte[] decodedAddress = Encryption.decode(Address);
+             //String decryptedAddress = Encryption.decrypt(decodedAddress, pkey);
+             //Name and ssn validation
+             if (name.equals(Name) && ssn.equals(SSN)) {
+                 System.out.println("Name: " + Name);
+                 System.out.println("SSN: " + ssn);
+                 System.out.println("Address: " + Address);
+                 System.out.println("Phone Number: " + Phone);
+                 System.out.println("Income: $" + Income);
+                 System.out.println("Email: " + Email);
+             } else {
+                 System.out.println("Incorrect Name or SSN");
+             }
+         } catch (Exception e) {
+             e.printStackTrace();
+         }
      }
 
      public void queryAccount() throws FileNotFoundException {
@@ -118,28 +128,40 @@ public class Customer {
          } catch (ParseException e) {
              e.printStackTrace();
          }
-         JSONObject jo = (JSONObject) obj;
-         long accountNumber = (long) jo.get("account number");
-         double checking = (double) jo.get("checking");
-         double savings = (double) jo.get("savings");
+         try {
+             JSONObject jo = (JSONObject) obj;
+             ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(Encryption.PRIVATE_KEY_FILE));
+             final PrivateKey privateKey = (PrivateKey) inputStream.readObject();
 
-         Scanner s = new Scanner(System.in);
-         System.out.println("Please Enter Account Number: ");
-         int accNumber = s.nextInt();
+             String accountNumber = (String) jo.get("account number");
+             byte[] decodedNumber = Encryption.decode(accountNumber);
+             final String decryptedNumber = Encryption.decrypt(decodedNumber, privateKey);
 
-         if (accNumber == accountNumber) {
-             System.out.println("Checking Account: $"+checking);
-             System.out.println("Savings Account: $"+savings);
+             double checking = (double) jo.get("checking");
+             double savings = (double) jo.get("savings");
+
+             Scanner s = new Scanner(System.in);
+             System.out.println("Please Enter Account Number: ");
+             String accNumber = s.next();
+
+             if (accNumber.equals(decryptedNumber)) {
+                 System.out.println("Checking Account: $"+checking);
+                 System.out.println("Savings Account: $"+savings);
+             }
+             else {
+                 System.out.println("Incorrect Account Number");
+             }
+         } catch (Exception e) {
+            e.printStackTrace();
          }
-         else {
-             System.out.println("Incorrect Account Number");
-         }
-
 
      }
-
+     @SuppressWarnings("unchecked")
      public void transferFunds() throws IOException, ParseException {
 
+
+         double newChecking; // Amount after checkings operations.
+         double newSavings; // Amount after savings operations
 
          JSONObject bankDetails = new JSONObject();
          //get banking information from bank.json
@@ -163,11 +185,14 @@ public class Customer {
         System.out.println("Which Account Would You Like to Transfer From? [1]Checking or [2]Savings: ");
         int choice = s.nextInt();
 
+
         if (choice == 1) {
             if (checkingAmount > transferAmount) {
                 System.out.println("Transferring $"+transferAmount + " to Savings");
-                double newChecking = checkingAmount - transferAmount;
-                double newSavings = savingsAmount + transferAmount;
+                newChecking = checkingAmount - transferAmount;
+                newSavings = savingsAmount + transferAmount;
+                bankDetails.put("checking", newChecking);
+                bankDetails.put("savings", newSavings);
 
                 bankDetails.put("checking", newChecking);
                 bankDetails.put("savings", newSavings);
@@ -181,8 +206,10 @@ public class Customer {
         else if (choice == 2) {
             if (savingsAmount > transferAmount) {
                 System.out.println("Transferring " + transferAmount + "to Checking");
-                double newSavings = savingsAmount - transferAmount;
-                double newChecking = checkingAmount + transferAmount;
+                newSavings = savingsAmount - transferAmount;
+                newChecking = checkingAmount + transferAmount;
+                bankDetails.put("checking", newChecking);
+                bankDetails.put("savings", newSavings);
 
                 bankDetails.put("checking", newChecking);
                 bankDetails.put("savings", newSavings);

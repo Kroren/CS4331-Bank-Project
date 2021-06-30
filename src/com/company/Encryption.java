@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.security.*;
+import java.util.Base64;
 import java.util.Scanner;
 
 public class Encryption {
@@ -90,6 +91,14 @@ public class Encryption {
         }
 
         return new String(dectyptedText);
+    }
+
+    public static String encode(byte[] encryptedText) {
+        return Base64.getEncoder().encodeToString(encryptedText);
+    }
+
+    public static byte[] decode(String encodedText) {
+        return Base64.getDecoder().decode(encodedText);
     }
 
 }
