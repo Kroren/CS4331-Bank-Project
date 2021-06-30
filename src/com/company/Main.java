@@ -46,7 +46,7 @@ public class Main {
                 customerLogin(sc);
                 break;
             case 2:
-                System.out.println("teller Login comming");
+                tellerLogin(sc);
                 break;
         }
     }
@@ -54,6 +54,7 @@ public class Main {
     //static void generateStocks() { }
 
     static void customerLogin(Scanner s) throws FileNotFoundException {
+
 
         Customer customer = new Customer();
 
@@ -78,7 +79,7 @@ public class Main {
                         customer.displayMenu();
                     } else {
                         System.out.println("Incorrect Username or Password");
-                        // Deny access
+
                     }
 
                 } catch (FileNotFoundException e) {
@@ -163,26 +164,28 @@ public class Main {
     }
 
     static void tellerLogin(Scanner s) throws FileNotFoundException {
-        // Created bank teller class object
+
+        Teller teller = new Teller();
         System.out.println("\n\nWelcome Bank Teller");
         System.out.println("-----------------");
-        System.out.println("[1] Login \n[2] Register \n[3] Exit");
+        System.out.println("[1] Login \n[2] Exit");
 
         int choice = s.nextInt();
 
         switch (choice) {
             case 1:
                 // Login here
-                System.out.print("\nUsername: ");
-                String username = s.next();
+                System.out.print("\nID: ");
+                int ID = s.nextInt();
                 System.out.print("Password: ");
                 String password = s.next();
+
                 // Might add password masking later.
                 try {
-                    boolean isLoggedIn = login(username, password);
+                    boolean isLoggedIn = loginTeller(ID, password);
                     if (isLoggedIn) {
                         System.out.println("logged in");
-                        // Go to bank teller panel
+                        // teller.displayMenu();
                     } else {
                         System.out.println("access Denied");
                         // Deny access
@@ -193,10 +196,49 @@ public class Main {
                 }
                 break;
             case 2:
-                // banktller register if you want?
-                break;
-            case 3:
+
                 break;
         }
+    }
+
+    static boolean loginTeller(int ID, String password) throws FileNotFoundException {
+        boolean isValid = true;
+        // Parsing accounts. json file
+        try {
+            Object obj = new JSONParser().parse(new FileReader("tellerAccount.json"));
+
+            // Typecasting to JSONObject
+            JSONObject jo = (JSONObject) obj;
+
+            int id = (int) jo.get("Teller ID");
+            String tPass = (String) jo.get("password");
+
+            // convert back to a byte array
+            //byte[] encodedPass = pass.getBytes(StandardCharsets.ISO_8859_1);
+            byte[] decodedPass = Base64.getDecoder().decode(tPass);
+            System.out.println("[DEBUG] encoded pass = " + decodedPass);
+
+            ObjectInputStream inputStream = null;
+            inputStream = new ObjectInputStream(new FileInputStream(Encryption.PRIVATE_KEY_FILE));
+            final PrivateKey privateKey = (PrivateKey) inputStream.readObject();
+            final String plainText = Encryption.decrypt(decodedPass, privateKey);
+
+            System.out.println("[DEBUG] Decrypted pass reads: " + plainText);
+
+
+            // If the login is valid
+            if (id == ID) {
+
+                // Login approved
+                isValid = true;
+            } else {
+                System.out.println("Incorrect Username or Password");
+                isValid = false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return isValid;
     }
 }

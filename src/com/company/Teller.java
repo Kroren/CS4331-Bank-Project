@@ -1,15 +1,19 @@
 package com.company;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.security.PublicKey;
+import java.text.DecimalFormat;
+import java.util.Base64;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Teller {
+
 
     public void displayMenu() throws FileNotFoundException {
 
@@ -33,15 +37,19 @@ public class Teller {
             {
                 case 1:
                     viewProfile();
+                    break;
                 case 2:
-                    //query account
+                    queryAccount();
+                    break;
                 case 3:
                     //Withdraw funds
                 case 4:
-                    //query stock
+                    queryStocks();
+                    break;
                 case 5:
                     logOut();
-
+                default:
+                    displayMenu();
             }
         }
         while(true);
@@ -89,11 +97,73 @@ public class Teller {
 
     }
 
-    // public void queryAccount(int accountNumber) {}
+    public void queryAccount() throws FileNotFoundException {
+
+        //get banking information from bank.json
+        Object obj = null;
+        try {
+            obj = new JSONParser().parse(new FileReader("bank.json"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        JSONObject jo = (JSONObject) obj;
+        long accountNumber = (long) jo.get("account number");
+        double checking = (double) jo.get("checking");
+        double savings = (double) jo.get("savings");
+
+        Scanner s = new Scanner(System.in);
+        System.out.println("Please Enter Account Number: ");
+        int accNumber = s.nextInt();
+
+        if (accNumber == accountNumber) {
+            System.out.println("Checking Account: $"+checking);
+            System.out.println("Savings Account: $"+savings);
+        }
+        else {
+            System.out.println("Incorrect Account Number");
+        }
+    }
 
     //public void withdrawFunds(int amount, int customerAccount) {}
 
-    //public void queryStocks(String customerName) {}
+    public void queryStocks() {
+        DecimalFormat formatter = new DecimalFormat("#0.00");
+        JSONParser parser = new JSONParser();
+
+
+        System.out.println("+------ Stock Exchange ------+");
+        try {
+            FileReader reader = new FileReader("Stocks.json");
+            Object obj = parser.parse(reader);
+            JSONArray stockArray = (JSONArray) obj;
+            Random r = new Random();
+
+            for (int i = 0; i < stockArray.size(); i++) {
+                JSONObject stockList = (JSONObject) stockArray.get(i);
+                String currentStock = Stocks.names[i];
+                JSONObject stock = (JSONObject) stockList.get(currentStock);
+
+                int coinFlip = r.nextInt(2);
+                String flip;
+
+                if (coinFlip == 1) {
+                    flip = "+";
+                } else {
+                    flip = "-";
+                }
+
+                System.out.print(currentStock);
+                System.out.print(" | PRICE " + formatter.format(stock.get("unitPrice")));
+                System.out.print(" | QUANTITY " + stock.get("quantity"));
+                System.out.print(" | %CHANGE " + flip + stock.get("change") + "%" + "\n");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public void logOut() {
 

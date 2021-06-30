@@ -1,8 +1,6 @@
 package com.company;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
-import java.util.Arrays;
 import java.util.Base64;
 
 import org.json.simple.JSONObject;
@@ -24,9 +22,11 @@ public class Account {
     String address = "123 69th St";
 
     int accountNumber = 696969;
-    int checking = 1000;
-    int savings = 1000;
+    double checking = 1000.00;
+    double savings = 1000.00;
 
+    int tellerId = 6969;
+    String tellerPassword = "teller";
 
 
     double balance = 1337.00;
@@ -40,6 +40,10 @@ public class Account {
         this.isTeller = isTeller;
 
     }
+
+
+
+
     @SuppressWarnings("unchecked")
     public void accountWrite(Account acct) throws FileNotFoundException {
         try {
@@ -108,6 +112,34 @@ public class Account {
             file.write(bankDetails.toJSONString());
             file.flush();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void tellerWrite(?????) throws FileNotFoundException {
+        try {
+            // Save the info here
+            JSONObject accountDetails = new JSONObject();
+
+            // Encrypt the password
+            ObjectInputStream inputStream = null;
+            inputStream = new ObjectInputStream(new FileInputStream(Encryption.PUBLIC_KEY_FILE));
+            final PublicKey publicKey = (PublicKey) inputStream.readObject();
+            final byte[] encryptedTPassword = Encryption.encrypt(acct.tellerPassword, publicKey);
+
+            // Trying to make a format that works for json
+            //String decodedPass = new String(encryptedPassword, StandardCharsets.ISO_8859_1);
+            String encodedTPass = Base64.getEncoder().encodeToString(encryptedTPassword);
+
+            accountDetails.put("Teller ID", acct.tellerId);
+            accountDetails.put("password", encodedTPass);
+
+            FileWriter file = new FileWriter("tellerAccount.json");
+            // Write the json information to the file.
+            file.write(accountDetails.toJSONString());
+            file.flush();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

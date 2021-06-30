@@ -42,19 +42,23 @@ public class Customer {
             {
                 case 1:
                     viewProfile();
+                    break;
                 case 2:
-                    //queryAccount();
                     queryAccount();
+                    break;
                 case 3:
-                    //transfer funds
+                    //transferFunds();
+                    break;
                 case 4:
                     queryStocks();
+                    break;
                 case 5:
                     //buy stock
                 case 6:
                     //sell stock
                 case 7:
                     logOut();
+                    break;
                 default:
                     displayMenu();
             }
@@ -103,8 +107,6 @@ public class Customer {
 
      }
 
-
-     //Not working need to read integers from json file
      public void queryAccount() throws FileNotFoundException {
 
         //get banking information from bank.json
@@ -118,8 +120,8 @@ public class Customer {
          }
          JSONObject jo = (JSONObject) obj;
          long accountNumber = (long) jo.get("account number");
-         long checking = (long) jo.get("checking");
-         long savings = (long) jo.get("savings");
+         double checking = (double) jo.get("checking");
+         double savings = (double) jo.get("savings");
 
          Scanner s = new Scanner(System.in);
          System.out.println("Please Enter Account Number: ");
@@ -136,44 +138,68 @@ public class Customer {
 
      }
 
-    public void transferFunds() {
+     public void transferFunds() throws IOException, ParseException {
 
-        //get values from bank file
+         JSONObject bankDetails = new JSONObject();
+         //get banking information from bank.json
+         Object obj = null;
+         try {
+             obj = new JSONParser().parse(new FileReader("bank.json"));
+         } catch (IOException e) {
+             e.printStackTrace();
+         } catch (ParseException e) {
+             e.printStackTrace();
+         }
+         JSONObject jo = (JSONObject) obj;
+         //long accountNumber = (long) jo.get("account number");
+         double checkingAmount = (double) jo.get("checking");
+         double savingsAmount = (double) jo.get("savings");
+
+
         Scanner s = new Scanner(System.in);
-        System.out.println("Please Enter Amount To Transfer: ");
-        int amount = s.nextInt();
-        System.out.println("Which Account Would You Like to Transfer From? Checking or Savings: ");
-        String choice = s.next();
+        System.out.println("Please Enter Amount To Transfer in Exact Change: ");
+        double transferAmount = s.nextDouble();
+        System.out.println("Which Account Would You Like to Transfer From? [1]Checking or [2]Savings: ");
+        int choice = s.nextInt();
 
-        if (choice.equals("Checking")) {
-            System.out.println("Transferring " + amount + "to Savings");
-            //application logic (subtract amount and set new amounts)
+        if (choice == 1) {
+            if (checkingAmount > transferAmount) {
+                System.out.println("Transferring $"+transferAmount + " to Savings");
+                double newChecking = checkingAmount - transferAmount;
+                double newSavings = savingsAmount + transferAmount;
+            }
+            else {
+                System.out.println("Insufficient Funds");
+            }
         }
-        else if (choice.equals("Savings")) {
-            System.out.println("Transferring " + amount + "to Checking");
-            //application logic (subtract amount and set new amounts)
+        else if (choice == 2) {
+            if (savingsAmount > transferAmount) {
+                System.out.println("Transferring " + transferAmount + "to Checking");
+                double newSavings = savingsAmount - transferAmount;
+                double newChecking = checkingAmount + transferAmount;
+            }
+            else {
+                System.out.println("Insufficient Funds");
+            }
         }
         else {
             System.out.println("Invalid Entry Please Try Again");
         }
-//        write new values to file
-//        JSONObject bankDetails = new JSONObject();
-//
-//
-//        bankDetails.put("checking", acct.checking);
-//        bankDetails.put("savings", acct.savings);
-//
-//        try (FileWriter file = new FileWriter("bank.json")) {
-//            // Write the json information to the file.
-//            file.write(bankDetails.toJSONString());
-//            file.flush();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
+
+//        bankDetails.put("checking", newChecking);
+//        bankDetails.put("savings", newSavings);
+
+        try (FileWriter file = new FileWriter("bank.json")) {
+            // Write the json information to the file.
+            file.write(bankDetails.toJSONString());
+            file.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void queryStocks() {
+
+     public void queryStocks() {
         DecimalFormat formatter = new DecimalFormat("#0.00");
         JSONParser parser = new JSONParser();
 
