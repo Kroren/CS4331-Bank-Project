@@ -21,7 +21,7 @@ public class Account {
     String name;
     String address = "123 69th St";
 
-    String accountNumber = "6666942069";
+    String accountNumber = "6666";
     double checking = 1000.00;
     double savings = 1000.00;
 

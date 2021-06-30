@@ -15,7 +15,7 @@ import java.util.Scanner;
 public class Teller {
 
 
-    public void displayMenu() throws FileNotFoundException {
+    public void displayMenu() throws IOException, ParseException {
 
         Scanner input = new Scanner(System.in);
 
@@ -42,12 +42,14 @@ public class Teller {
                     queryAccount();
                     break;
                 case 3:
-                    //Withdraw funds
+                    withdrawFunds();
+                    break;
                 case 4:
                     queryStocks();
                     break;
                 case 5:
                     logOut();
+                    break;
                 default:
                     displayMenu();
             }
@@ -126,7 +128,76 @@ public class Teller {
         }
     }
 
-    //public void withdrawFunds(int amount, int customerAccount) {}
+    public void withdrawFunds() throws IOException, ParseException {
+
+
+        JSONObject bankDetails = new JSONObject();
+        //get banking information from bank.json
+        Object obj = null;
+        try {
+            obj = new JSONParser().parse(new FileReader("bank.json"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        JSONObject jo = (JSONObject) obj;
+        long accountNumber = (long) jo.get("account number");
+        double checkingAmount = (double) jo.get("checking");
+        double savingsAmount = (double) jo.get("savings");
+        //int accountNumber = (int) jo.get("account number");
+
+        Scanner s = new Scanner(System.in);
+        System.out.println("Please Enter Amount To Withdraw in Exact Change: ");
+        double transferAmount = s.nextDouble();
+        System.out.println("Which Account Would You Like to Withdraw From? [1]Checking or [2]Savings: ");
+        int choice = s.nextInt();
+
+        if (choice == 1) {
+            if (checkingAmount > transferAmount) {
+                System.out.println("Withdrawing $"+transferAmount);
+                double newChecking = checkingAmount - transferAmount;
+
+                double newSavings = savingsAmount;
+
+                bankDetails.put("checking", newChecking);
+                bankDetails.put("savings", newSavings);
+                bankDetails.put("account number", accountNumber);
+
+            }
+            else {
+                System.out.println("Insufficient Funds");
+            }
+        }
+        else if (choice == 2) {
+            if (savingsAmount > transferAmount) {
+                System.out.println("Withdrawing $" + transferAmount);
+                double newSavings = savingsAmount - transferAmount;
+
+                double newChecking = checkingAmount;
+
+                bankDetails.put("checking", newChecking);
+                bankDetails.put("savings", newSavings);
+                bankDetails.put("account number", accountNumber);
+
+            }
+            else {
+                System.out.println("Insufficient Funds");
+            }
+        }
+        else {
+            System.out.println("Invalid Entry Please Try Again");
+        }
+
+
+        try (FileWriter file = new FileWriter("bank.json")) {
+            // Write the json information to the file.
+            file.write(bankDetails.toJSONString());
+            file.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void queryStocks() {
         DecimalFormat formatter = new DecimalFormat("#0.00");
@@ -172,7 +243,7 @@ public class Teller {
         int choice = s.nextInt();
 
         if (choice == 1 ) {
-            System.out.println("Thank You For Choosing the Secure Bank of Uganda Goodbye");
+            System.out.println("Thank You For Choosing the Secure Bank of Springfield Goodbye");
             System.exit(0);
         }
         else if (choice ==  2) {

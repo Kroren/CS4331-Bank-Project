@@ -188,7 +188,7 @@ public class Main {
             case 1:
                 // Login here
                 System.out.print("\nID: ");
-                int ID = s.nextInt();
+                String ID = s.next();
                 System.out.print("Password: ");
                 String password = s.next();
 
@@ -197,13 +197,17 @@ public class Main {
                     boolean isLoggedIn = loginTeller(ID, password);
                     if (isLoggedIn) {
                         System.out.println("logged in");
-                        // teller.displayMenu();
+                        teller.displayMenu();
                     } else {
                         System.out.println("access Denied");
                         // Deny access
                     }
 
                 } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
                 break;
@@ -213,7 +217,7 @@ public class Main {
         }
     }
 
-    static boolean loginTeller(int ID, String password) throws FileNotFoundException {
+    static boolean loginTeller(String ID, String password) throws FileNotFoundException {
         boolean isValid = true;
         // Parsing accounts. json file
         try {
@@ -222,7 +226,7 @@ public class Main {
             // Typecasting to JSONObject
             JSONObject jo = (JSONObject) obj;
 
-            int id = (int) jo.get("Teller ID");
+            String id = (String) jo.get("Teller ID");
             String tPass = (String) jo.get("password");
 
             // convert back to a byte array
@@ -239,7 +243,7 @@ public class Main {
 
 
             // If the login is valid
-            if (id == ID) {
+            if (id.equals(ID)) {
 
                 // Login approved
                 isValid = true;

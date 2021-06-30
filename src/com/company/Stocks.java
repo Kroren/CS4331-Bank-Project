@@ -27,7 +27,7 @@ public class Stocks {
             JSONArray stockList = new JSONArray();
 
             for (String n : names) {
-                System.out.println("Found stock " + n);
+                //System.out.println("Found stock " + n);
                 JSONObject stockDetails = new JSONObject();
                 double min = 0;
                 double max = 10.50;
@@ -55,4 +55,21 @@ public class Stocks {
             e.printStackTrace();
         }
     }
+
+    public static void confirmation(String currentStock, int amount, double totalAmount) {
+        DecimalFormat formatter = new DecimalFormat("#0.00");
+
+        System.out.println("You Have Just Purchased " + amount + " " + currentStock + " for " + formatter.format(totalAmount));
+
+    }
+
+    public static void stockSell(String currentStock, int amount, double totalAmount) {
+        DecimalFormat formatter = new DecimalFormat("#0.00");
+
+        System.out.println("You Have Just Sold " + amount + " " + currentStock + " for " + formatter.format(totalAmount));
+
+    }
+
 }
+
+

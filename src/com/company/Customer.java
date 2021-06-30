@@ -53,12 +53,13 @@ public class Customer {
                     queryStocks();
                     break;
                 case 5:
-                    //buy stock
+                    buyStock();
+                    break;
                 case 6:
-                    //sell stock
+                    sellStock();
+                    break;
                 case 7:
                     logOut();
-                    break;
                 default:
                     displayMenu();
             }
@@ -66,7 +67,9 @@ public class Customer {
         while(true);
     }
 
-     public void viewProfile() throws FileNotFoundException {
+
+
+    public void viewProfile() throws FileNotFoundException {
 
         //get customer information from profile.json
          Object obj = null;
@@ -156,6 +159,7 @@ public class Customer {
          }
 
      }
+
      @SuppressWarnings("unchecked")
      public void transferFunds() throws IOException, ParseException {
 
@@ -177,7 +181,6 @@ public class Customer {
          long accountNumber = (long) jo.get("account number");
          double checkingAmount = (double) jo.get("checking");
          double savingsAmount = (double) jo.get("savings");
-         //int accountNumber = (int) jo.get("account number");
 
         Scanner s = new Scanner(System.in);
         System.out.println("Please Enter Amount To Transfer in Exact Change: ");
@@ -191,8 +194,6 @@ public class Customer {
                 System.out.println("Transferring $"+transferAmount + " to Savings");
                 newChecking = checkingAmount - transferAmount;
                 newSavings = savingsAmount + transferAmount;
-                bankDetails.put("checking", newChecking);
-                bankDetails.put("savings", newSavings);
 
                 bankDetails.put("checking", newChecking);
                 bankDetails.put("savings", newSavings);
@@ -208,8 +209,6 @@ public class Customer {
                 System.out.println("Transferring " + transferAmount + "to Checking");
                 newSavings = savingsAmount - transferAmount;
                 newChecking = checkingAmount + transferAmount;
-                bankDetails.put("checking", newChecking);
-                bankDetails.put("savings", newSavings);
 
                 bankDetails.put("checking", newChecking);
                 bankDetails.put("savings", newSavings);
@@ -272,15 +271,187 @@ public class Customer {
         }
     }
 
-    //public void buyStock(String stockName, int quantity, double price, int accountNumber) {}
+     public void buyStock() {
 
-    //public void sellStock(String stockName, int quantity, double price, int accountNumber) {}
+        DecimalFormat formatter = new DecimalFormat("#0.00");
+        Scanner s = new Scanner(System.in);
+        System.out.println("Please Enter Stock Name: ");
+        String stockN = s.next();
+        System.out.println("Please Enter How Many You Want to Buy: ");
+        int amount = s.nextInt();
+
+         JSONObject bankDetails = new JSONObject();
+        Object obj = null;
+        try {
+            obj = new JSONParser().parse(new FileReader("bank.json"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        try {
+            JSONObject jo = (JSONObject) obj;
+
+            String accountNumber = (String) jo.get("account number");
+            double checking = (double) jo.get("checking");
+            double savings = (double) jo.get("savings");
+
+            JSONParser parser = new JSONParser();
+
+            try {
+                FileReader reader = new FileReader("Stocks.json");
+                Object obj1 = parser.parse(reader);
+                JSONArray stockArray = (JSONArray) obj1;
+                Random r = new Random();
+
+                //get all stock names
+                for (int i = 0; i < stockArray.size(); i++) {
+                    JSONObject stockList = (JSONObject) stockArray.get(i);
+                    String currentStock = Stocks.names[i];
+
+                    //find correct match
+                    if (stockN.equals(currentStock)) {
+                        JSONObject stock = (JSONObject) stockList.get(currentStock);
+
+                        double currentPrice = (double) stock.get("unitPrice");
+                        double totalAmount = amount * currentPrice;
+
+                        //check account balance
+                        if (checking > totalAmount) {
+                            //get confirmation message from stocks class
+                            Stocks.confirmation(currentStock, amount, totalAmount);
+                            double newChecking = checking - totalAmount;
+
+                            //set new values to be wrote
+                            bankDetails.put("checking", newChecking);
+                            bankDetails.put("savings", savings);
+                            bankDetails.put("account number", accountNumber);
+
+                        } else {
+                            System.out.println("Insufficient Funds");
+                            break;
+                        }
+
+                    } else {
+                        break;
+                    }
+
+                    try (FileWriter file = new FileWriter("bank.json")) {
+                        // Write the json information to the file.
+                        file.write(bankDetails.toJSONString());
+                        file.flush();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            //submit to stock trading system
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+        public void sellStock() {
+            DecimalFormat formatter = new DecimalFormat("#0.00");
+            Scanner s = new Scanner(System.in);
+            System.out.println("Please Enter Stock Name: ");
+            String stockN = s.next();
+            System.out.println("Please Enter How Many You Want to Sell: ");
+            int amount = s.nextInt();
+            System.out.println("Please Enter Your Account Number: ");
+            String acc = s.next();
+
+            JSONObject bankDetails = new JSONObject();
+            Object obj = null;
+            try {
+                obj = new JSONParser().parse(new FileReader("bank.json"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            try {
+                JSONObject jo = (JSONObject) obj;
+
+                ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(Encryption.PRIVATE_KEY_FILE));
+                final PrivateKey privateKey = (PrivateKey) inputStream.readObject();
+
+                String accountNumber = (String) jo.get("account number");
+                byte[] decodedNumber = Encryption.decode(accountNumber);
+                final String decryptedNumber = Encryption.decrypt(decodedNumber, privateKey);
+
+                double checking = (double) jo.get("checking");
+                double savings = (double) jo.get("savings");
+
+                JSONParser parser = new JSONParser();
+
+                try {
+                    FileReader reader = new FileReader("Stocks.json");
+                    Object obj1 = parser.parse(reader);
+                    JSONArray stockArray = (JSONArray) obj1;
+                    Random r = new Random();
+
+                    //get all stock names
+                    for (int i = 0; i < stockArray.size(); i++) {
+                        JSONObject stockList = (JSONObject) stockArray.get(i);
+                        String currentStock = Stocks.names[i];
+
+                        //find correct match
+                        if (stockN.equals(currentStock)) {
+                            JSONObject stock = (JSONObject) stockList.get(currentStock);
+
+                            double currentPrice = (double) stock.get("unitPrice");
+                            double totalAmount = amount * currentPrice;
+
+                            //check if account is valid
+                            if (acc.equals(decryptedNumber)) {
+                                //get confirmation message from stocks class
+                                Stocks.stockSell(currentStock, amount, totalAmount);
+                                double newChecking = checking + totalAmount;
+
+                                //set new values to be wrote
+                                bankDetails.put("checking", newChecking);
+                                bankDetails.put("savings", savings);
+                                bankDetails.put("account number", accountNumber);
+
+                            } else {
+                                System.out.println("Invalid Account");
+                                break;
+                            }
+
+                        } else {
+                            //System.out.println("Could Not Find Stock " + stockN);
+                            break;
+                        }
+
+                        try (FileWriter file = new FileWriter("bank.json")) {
+                            // Write the json information to the file.
+                            file.write(bankDetails.toJSONString());
+                            file.flush();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
 
     public void logOut() {
 
-        Scanner s = new Scanner(System.in);
+        Scanner sc = new Scanner(System.in);
         System.out.println("Are you Sure You Want To Exit [1]Yes or [2]No?");
-        int choice = s.nextInt();
+        int choice = sc.nextInt();
 
         if (choice == 1 ) {
             System.out.println("Thank You For Choosing the Secure Bank of Springfield Goodbye");
