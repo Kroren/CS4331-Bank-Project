@@ -1,9 +1,7 @@
 package com.company;
 
 import java.text.DecimalFormat;
-import java.util.Iterator;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -14,11 +12,10 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.Arrays;
-
 
 
 public class Customer {
+
 
     public void displayMenu() throws IOException, ParseException {
 
@@ -140,8 +137,8 @@ public class Customer {
              byte[] decodedNumber = Encryption.decode(accountNumber);
              final String decryptedNumber = Encryption.decrypt(decodedNumber, privateKey);
 
-             double checking = (double) jo.get("checking");
-             double savings = (double) jo.get("savings");
+             var checking = jo.get("checking");
+             var savings = jo.get("savings");
 
              Scanner s = new Scanner(System.in);
              System.out.println("Please Enter Account Number: ");
@@ -178,7 +175,7 @@ public class Customer {
              e.printStackTrace();
          }
          JSONObject jo = (JSONObject) obj;
-         long accountNumber = (long) jo.get("account number");
+         var accountNumber = jo.get("account number");
          double checkingAmount = (double) jo.get("checking");
          double savingsAmount = (double) jo.get("savings");
 
@@ -198,7 +195,7 @@ public class Customer {
                 bankDetails.put("checking", newChecking);
                 bankDetails.put("savings", newSavings);
                 bankDetails.put("account number", accountNumber);
-
+                System.out.println("Savings' new balance is now: " + newSavings);
             }
             else {
                 System.out.println("Insufficient Funds");
@@ -213,6 +210,7 @@ public class Customer {
                 bankDetails.put("checking", newChecking);
                 bankDetails.put("savings", newSavings);
                 bankDetails.put("account number", accountNumber);
+                System.out.println("Checking's new balance is now: " + newChecking);
 
             }
             else {
@@ -319,7 +317,9 @@ public class Customer {
                         //check account balance
                         if (checking > totalAmount) {
                             //get confirmation message from stocks class
-                            Stocks.confirmation(currentStock, amount, totalAmount);
+                            System.out.println("test msg in stock buying");
+                            Stocks.confirmation(accountNumber ,currentStock, amount, totalAmount);
+                            System.out.println("test msg in stock buying");
                             double newChecking = checking - totalAmount;
 
                             //set new values to be wrote

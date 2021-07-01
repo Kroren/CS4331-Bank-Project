@@ -2,7 +2,9 @@ package com.company;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.text.DecimalFormat;
 import java.util.Random;
@@ -56,8 +58,26 @@ public class Stocks {
         }
     }
 
-    public static void confirmation(String currentStock, int amount, double totalAmount) {
+    @SuppressWarnings("unchecked")
+    public static void confirmation(String account, String currentStock, int amount, double totalAmount) {
         DecimalFormat formatter = new DecimalFormat("#0.00");
+        JSONParser parser = new JSONParser();
+
+        try {
+            Object obj = parser.parse(new FileReader("stock_system.json"));
+            JSONArray stockInventory = (JSONArray) obj;
+
+            JSONObject stock = new JSONObject();
+            stock.put("stock", currentStock);
+            stock.put("shares", amount);
+            stock.put("price", totalAmount);
+
+            stockInventory.add(stock);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
         System.out.println("You Have Just Purchased " + amount + " " + currentStock + " for " + formatter.format(totalAmount));
 
