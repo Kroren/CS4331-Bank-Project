@@ -119,7 +119,7 @@ public class Main {
         System.out.println("What is your full name?");
         String fullName = s.next();
 
-        System.out.println("I'm too lazy to actually fill out the rest of the prompt, so using all the filler info.");
+        System.out.println("filler info used please look at profile.json for all your information");
         try {
             Account newAccount = new Account(username, password, fullName, false);
 
@@ -208,6 +208,8 @@ public class Main {
                 } catch (ParseException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
                 break;

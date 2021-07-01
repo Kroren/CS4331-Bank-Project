@@ -119,10 +119,14 @@ public class Customer {
 
      public void queryAccount() throws FileNotFoundException {
 
+         DecimalFormat formatter = new DecimalFormat("#0.00");
         //get banking information from bank.json
         Object obj = null;
+        Object obj1 = null;
          try {
              obj = new JSONParser().parse(new FileReader("bank.json"));
+             obj1 = new JSONParser().parse(new FileReader("stock_system.json"));
+
          } catch (IOException e) {
              e.printStackTrace();
          } catch (ParseException e) {
@@ -130,12 +134,18 @@ public class Customer {
          }
          try {
              JSONObject jo = (JSONObject) obj;
+             JSONObject jo1 = (JSONObject) obj1;
+
              ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(Encryption.PRIVATE_KEY_FILE));
              final PrivateKey privateKey = (PrivateKey) inputStream.readObject();
 
              String accountNumber = (String) jo.get("account number");
              byte[] decodedNumber = Encryption.decode(accountNumber);
              final String decryptedNumber = Encryption.decrypt(decodedNumber, privateKey);
+
+             var stock = jo1.get("stock");
+             var shares = jo1.get("shares");
+             var price = jo1.get("price");
 
              var checking = jo.get("checking");
              var savings = jo.get("savings");
@@ -145,8 +155,9 @@ public class Customer {
              String accNumber = s.next();
 
              if (accNumber.equals(decryptedNumber)) {
-                 System.out.println("Checking Account: $"+checking);
-                 System.out.println("Savings Account: $"+savings);
+                 System.out.println("Checking Account: $"+formatter.format(checking));
+                 System.out.println("Savings Account: $"+ formatter.format(savings));
+                 System.out.println(shares + " shares of " + stock + " at " + formatter.format(price));
              }
              else {
                  System.out.println("Incorrect Account Number");
@@ -203,14 +214,14 @@ public class Customer {
         }
         else if (choice == 2) {
             if (savingsAmount > transferAmount) {
-                System.out.println("Transferring " + transferAmount + "to Checking");
+                System.out.println("Transferring " + transferAmount + " to Checking");
                 newSavings = savingsAmount - transferAmount;
                 newChecking = checkingAmount + transferAmount;
 
                 bankDetails.put("checking", newChecking);
                 bankDetails.put("savings", newSavings);
                 bankDetails.put("account number", accountNumber);
-                System.out.println("Checking's new balance is now: " + newChecking);
+                System.out.println("Checking new balance is now: " + newChecking);
 
             }
             else {
@@ -291,8 +302,8 @@ public class Customer {
             JSONObject jo = (JSONObject) obj;
 
             String accountNumber = (String) jo.get("account number");
-            double checking = (double) jo.get("checking");
-            double savings = (double) jo.get("savings");
+            var checking = (double) jo.get("checking");
+            var savings = (double) jo.get("savings");
 
             JSONParser parser = new JSONParser();
 
@@ -317,9 +328,9 @@ public class Customer {
                         //check account balance
                         if (checking > totalAmount) {
                             //get confirmation message from stocks class
-                            System.out.println("test msg in stock buying");
+
                             Stocks.confirmation(accountNumber ,currentStock, amount, totalAmount);
-                            System.out.println("test msg in stock buying");
+
                             double newChecking = checking - totalAmount;
 
                             //set new values to be wrote
@@ -355,7 +366,7 @@ public class Customer {
         }
     }
 
-        public void sellStock() {
+    public void sellStock() {
             DecimalFormat formatter = new DecimalFormat("#0.00");
             Scanner s = new Scanner(System.in);
             System.out.println("Please Enter Stock Name: ");

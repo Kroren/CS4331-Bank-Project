@@ -6,6 +6,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.*;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.text.DecimalFormat;
 import java.util.Base64;
@@ -15,7 +16,7 @@ import java.util.Scanner;
 public class Teller {
 
 
-    public void displayMenu() throws IOException, ParseException {
+    public void displayMenu() throws IOException, ParseException, ClassNotFoundException {
 
         Scanner input = new Scanner(System.in);
 
@@ -99,8 +100,9 @@ public class Teller {
 
     }
 
-    public void queryAccount() throws FileNotFoundException {
+    public void queryAccount() throws IOException, ClassNotFoundException {
 
+        DecimalFormat formatter = new DecimalFormat("#0.00");
         //get banking information from bank.json
         Object obj = null;
         try {
@@ -110,18 +112,25 @@ public class Teller {
         } catch (ParseException e) {
             e.printStackTrace();
         }
+
         JSONObject jo = (JSONObject) obj;
-        long accountNumber = (long) jo.get("account number");
-        double checking = (double) jo.get("checking");
-        double savings = (double) jo.get("savings");
+        ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(Encryption.PRIVATE_KEY_FILE));
+        final PrivateKey privateKey = (PrivateKey) inputStream.readObject();
+
+        String accountNumber = (String) jo.get("account number");
+        byte[] decodedNumber = Encryption.decode(accountNumber);
+        final String decryptedNumber = Encryption.decrypt(decodedNumber, privateKey);
+
+        var checking = (double) jo.get("checking");
+        var savings = (double) jo.get("savings");
 
         Scanner s = new Scanner(System.in);
         System.out.println("Please Enter Account Number: ");
-        int accNumber = s.nextInt();
+        String accNumber = s.next();
 
-        if (accNumber == accountNumber) {
-            System.out.println("Checking Account: $"+checking);
-            System.out.println("Savings Account: $"+savings);
+        if (accNumber.equals(decryptedNumber)) {
+            System.out.println("Checking Account: $"+formatter.format(checking));
+            System.out.println("Savings Account: $"+formatter.format(savings));
         }
         else {
             System.out.println("Incorrect Account Number");
@@ -142,9 +151,9 @@ public class Teller {
             e.printStackTrace();
         }
         JSONObject jo = (JSONObject) obj;
-        long accountNumber = (long) jo.get("account number");
-        double checkingAmount = (double) jo.get("checking");
-        double savingsAmount = (double) jo.get("savings");
+        String accountNumber = (String) jo.get("account number");
+        var checkingAmount = (double) jo.get("checking");
+        var savingsAmount = (double) jo.get("savings");
         //int accountNumber = (int) jo.get("account number");
 
         Scanner s = new Scanner(System.in);

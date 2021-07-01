@@ -61,23 +61,24 @@ public class Stocks {
     @SuppressWarnings("unchecked")
     public static void confirmation(String account, String currentStock, int amount, double totalAmount) {
         DecimalFormat formatter = new DecimalFormat("#0.00");
-        JSONParser parser = new JSONParser();
+        //JSONParser parser = new JSONParser();
+
+        String method = "buy";
 
         try {
-            Object obj = parser.parse(new FileReader("stock_system.json"));
-            JSONArray stockInventory = (JSONArray) obj;
-
             JSONObject stock = new JSONObject();
+            stock.put("transaction", method);
             stock.put("stock", currentStock);
             stock.put("shares", amount);
             stock.put("price", totalAmount);
 
-            stockInventory.add(stock);
+            FileWriter file = new FileWriter("stock_system.json");
+            file.write(stock.toJSONString());
+            file.flush();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
 
         System.out.println("You Have Just Purchased " + amount + " " + currentStock + " for " + formatter.format(totalAmount));
 
@@ -86,6 +87,22 @@ public class Stocks {
     public static void stockSell(String currentStock, int amount, double totalAmount) {
         DecimalFormat formatter = new DecimalFormat("#0.00");
 
+        String method = "sold";
+
+        try {
+            JSONObject stock = new JSONObject();
+            stock.put("transaction", method);
+            stock.put("stock", currentStock);
+            stock.put("shares", amount);
+            stock.put("price", totalAmount);
+
+            FileWriter file = new FileWriter("stock_system.json");
+            file.write(stock.toJSONString());
+            file.flush();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         System.out.println("You Have Just Sold " + amount + " " + currentStock + " for " + formatter.format(totalAmount));
 
     }
